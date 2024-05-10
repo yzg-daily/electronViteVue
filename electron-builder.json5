@@ -1,24 +1,24 @@
 // @see https://www.electron.build/configuration/configuration
 {
-  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json", // 配置文件格式
   "appId": "YourAppID",
-  "asar": true,
+  "asar": true, // 是否打包为asar格式
   "productName": "YourAppName",
-  "directories": {
-    "output": "release/${version}"
+  "directories": { // 目录
+    "output": "release/${version}" // 输出目录
   },
   "files": [
     "dist",
     "dist-electron"
   ],
   "mac": {
-    "target": [
+    "target": [ // 打包成dmg格式
       "dmg"
     ],
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
-    "target": [
+    "target": [ // 打包成nsis格式
       {
         "target": "nsis",
         "arch": [
@@ -26,13 +26,27 @@
         ]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    "artifactName": "${productName}-Windows-${version}-Setup.${ext}" // 输出文件名
   },
+  // 设置安装图片
   "nsis": {
-    "oneClick": false,
-    "perMachine": false,
-    "allowToChangeInstallationDirectory": true,
-    "deleteAppDataOnUninstall": false
+    "oneClick": false, // 一键安装
+    "perMachine": false, // 是否为所有用户安装
+    "allowToChangeInstallationDirectory": true, // 允许用户更改安装目录
+    "deleteAppDataOnUninstall": false, // 卸载时删除应用数据
+    "createDesktopShortcut": true, // 创建桌面快捷方式
+    "createStartMenuShortcut": true, // 创建开始菜单快捷方式
+    "include": "build/installer.nsh", // 包含自定义脚本
+    "installerIcon": "build/icons/icon.ico", // 安装图标
+    "uninstallerIcon": "build/icons/icon.ico", // 卸载图标
+    "license": "LICENSE", // 许可协议
+    "allowElevation": true, // 允许请求提升权限
+    "installerHeader": "build/installerHeader.bmp", // 安装头部图片
+    "installerSidebar": "build/installerSidebar.bmp", // 安装侧边图片
+    "uninstallerSidebar": "build/uninstallerSidebar.bmp", // 卸载侧边图片
+    "shortcutName": "YourAppName", // 快捷方式名称
+    "runAfterFinish": true, // 安装完成后运行
+    "installerHeaderIcon": "build/icons/icon.ico", // 安装头部图标
   },
   "linux": {
     "target": [
