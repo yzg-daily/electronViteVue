@@ -3,16 +3,19 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import electron from 'vite-plugin-electron/simple'
 import pkg from './package.json'
+import path from "node:path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
+  // 强制刷新 dist-electron 目录，避免缓存问题， plugins 里面的 vite-plugin-electron-simple 会自动刷新 dist-electron 目录
   fs.rmSync('dist-electron', { recursive: true, force: true })
 
   const isServe = command === 'serve'
   const isBuild = command === 'build'
   const sourcemap = isServe || !!process.env.VSCODE_DEBUG
-
+  // vite 插件
   return {
+
     plugins: [
       vue(),
       electron({
@@ -62,6 +65,13 @@ export default defineConfig(({ command }) => {
         renderer: {},
       }),
     ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+        '@c': path.resolve(__dirname, 'src/components'),
+        '@v': path.resolve(__dirname, 'src/views'),
+      }
+    },
     server: process.env.VSCODE_DEBUG && (() => {
       const url = new URL(pkg.debug.env.VITE_DEV_SERVER_URL)
       return {

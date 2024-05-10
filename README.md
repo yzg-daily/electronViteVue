@@ -42,16 +42,31 @@ npm run dev
 ## Directory
 
 ```diff
-+ ├─┬ electron
-+ │ ├─┬ main
-+ │ │ └── index.ts    entry of Electron-Main
-+ │ └─┬ preload
-+ │   └── index.ts    entry of Preload-Scripts
+## 约定的开发目录
+
+```diff
+  ├─┬ electron
+  │ ├─┬ main
+  │ │ └── index.ts    entry of Electron-Main
++ │ │ └── menu   菜单目录
++ │ │ └── tray   托盘目录
++ │ │ └── window 窗口目录
++ │ │ └── ipc  ipcMain目录
++ │ │ └── ... 其他目录
+  │ └─┬ preload 预加载脚本目录 开发中目录参考 electrion/main
+  │   └── index.ts    entry of Preload-Scripts
++ │ └─┬ utils  工具目录
++ │   └── index.ts    工具函数
   ├─┬ src
-  │ └── main.ts       entry of Electron-Renderer
+  │ └── main.ts 
+  ├─┬ public   静态文件 
++ │ └── icon   项目图标
   ├── index.html
+  ├── electron-builder.json5 electron-builder 配置文件
   ├── package.json
   └── vite.config.ts
+   
+```
 ```
 
 <!--
