@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
-import {ref, nextTick} from "vue";
+import {ref} from "vue";
 
-const list = ref([
+const list = ref<HomeListItem[]>([
   { name: '微信', href: 'weixin://' },
   { name: 'sftp', href: 'qy-toolbar://' },
   { name: 'qq', href: 'qq://' },

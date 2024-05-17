@@ -3,8 +3,19 @@ import {isMac} from "../../utils";
 import {exec,execSync} from 'node:child_process'
 import path from 'node:path'
 import fs from 'node:fs'
+import {saveFile, readyFile} from '../../utils/nodeFs'
 
 
+app.whenReady().then(() => {
+    ipcMain.handle('qy:saveFile', async (event, data) => {
+        const {filePath, content} = data;
+        return await saveFile(filePath, content)
+    })
+    ipcMain.handle('qy:readyFile', async (event, filePath) => {
+
+        return await readyFile(filePath)
+    })
+})
 // Windows 用户的开始菜单目录
 const startMenuPath = path.join(process.env.APPDATA, 'Microsoft', 'Windows', 'Start Menu');
 
@@ -27,8 +38,8 @@ const startMenuShortcuts = readShortcutFiles(startMenuPath);
 const desktopShortcuts = readShortcutFiles(desktopPath);
 const a = readShortcutFiles("D:\\快捷方式")
 const documents = readShortcutFiles(app.getPath("documents"));
-console.log(documents);
-console.log(app.getPath("documents"), 'app.getPath("documents")');
+// console.log(documents);
+// console.log(app.getPath("documents"), 'app.getPath("documents")');
 // console.log(startMenuShortcuts);
 // console.log(desktopShortcuts);
 
@@ -76,3 +87,6 @@ ipcMain.on('get:computer:registry', (event ) => {
 //     const softwareList = files.map(file => path.join('C:\\Program Files', file));
 //     console.log('~/Library/Saved Application Links', softwareList);
 // })
+
+
+

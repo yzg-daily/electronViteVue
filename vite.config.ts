@@ -67,9 +67,11 @@ export default defineConfig(({ command }) => {
     ],
     resolve: {
       alias: {
+        '@t': path.resolve(__dirname, 'types'),
         '@': path.resolve(__dirname, 'src'),
         '@c': path.resolve(__dirname, 'src/components'),
         '@v': path.resolve(__dirname, 'src/views'),
+        '@u': path.resolve(__dirname, 'src/utils'),
       }
     },
     server: process.env.VSCODE_DEBUG && (() => {

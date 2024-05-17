@@ -9,12 +9,18 @@
 html, body {
     /*height: 100vh;*/
     @apply transition-all duration-300;
+    height: auto;
+    background-color: transparent;
+}
+ul, li {
+    list-style: none;
+    padding-left: 0;
 }
 
 .drag {
-    -webkit-user-select: none;
+    /*-webkit-user-select: none;*/
     -webkit-app-region: drag;
-    button {
+    button, input {
         -webkit-app-region: no-drag;
     }
 }
@@ -34,4 +40,8 @@ html, body {
     code {
         background-color: #f9f9f9;
     }
+}
+
+.qy-transition {
+    transition: all .5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }

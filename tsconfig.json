@@ -19,8 +19,12 @@
       "electron/electron.d.ts"
     ],
     "paths": {
-      "electron": ["./node_modules/electron"],
-      "@": ["./src"]
+      "@": ["./src"],
+      "@c": ["./src/components"],
+      "@v": ["./src/views"],
+      "@u": ["./src/utils"],
+      "@t": ["./types"],
+      "electron": ["./node_modules/electron"]
     }
   },
   "include": [

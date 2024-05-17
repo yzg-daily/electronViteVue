@@ -1,99 +1,280 @@
 <script setup lang="ts">
-import {Message, Setting, Delete, Plus} from '@element-plus/icons-vue'
-import {ref}  from "vue";
+import {onMounted, ref, watch} from "vue";
+import {Delete, Edit, Message, Plus, Setting, MoreFilled} from '@element-plus/icons-vue'
+
+import editForm from '@c/todo/editForm.vue'
+import editTask from '@c/todo/editTask.vue'
+import {uuid} from "@u"
+import {getJson, savaJson} from '../../utils/save'
+import {formatDateTime} from '../../utils/times'
+
 defineOptions({
   name: 'to-do-list'
 })
-const todoList = ref<GroupItem>([
+
+const defaultData = [
   {
+    id: uuid(),
     title: '我是官方',
-    subtitle: '官方标题',
+    subtitle: '使用说明！',
     status: true,
-    type: 'danger',
+    // type: 'danger',
+    weight: 1,
     children: [
-        {title: '我是任务', status: 'danger', content: '我是任务内容'},
-        {title: '我是任务1', status: 'danger', content: '我是任务内容1'},
-        {title: '我是任务2', status: 'danger', content: '我是任务内容2'},
+      {
+        title: '',
+        type: 'primary',
+        // status: 'danger',
+        content: '这是官方得说明。分组建议您按照时间，任务类型，紧急程度等进行分类管理，也可随心搭配！',
+        startTime: new Date().getTime(),
+        endTime: new Date().getTime(),
+        createTime: new Date().getTime(),
+        updateTime: new Date().getTime(),
+      },
     ]
-  },
-  {
-    title: '我是官方',
-    subtitle: '官方标题',
-    status: true,
-    type: 'danger'
   }
-])
-const currentGroup = ref<TodoItem>({title: '', subtitle: '', status: '', children: []})
-function handleGroupItem(el: GroupItem) {
-  currentGroup.value = el;
+]
+const todoList = ref<GroupItem[]>([])
+const currentGroup = ref<GroupItem>({
+  title: '',
+  subtitle: '',
+  type: 'primary',
+  status: false,
+  children: []
+})
+const record = ref<GroupItem | undefined>(undefined);
+const editFormRef = ref();
+function handleGroupItem(el: GroupItem, index: number) {
+  currentGroup.value = {
+    ...el,
+    index,
+    children: el?.children ?? []
+  };
 }
+function handleGroupAdd() {
+  record.value = undefined;
+  editFormRef.value.handleShow();
+}
+function handleGroupEdit(el: GroupItem, index: number) {
+  handleGroupAdd();
+  record.value = {
+    ...el,
+    children: [...(el?.children || [])],
+    index
+  };
+}
+function handleGroupDel(index: number, id: string | undefined) {
+  todoList.value.splice(index, 1);
+  if (!id) return false;
+  if (currentGroup.value.id === id) currentGroup.value = {};
+}
+function onSubmit(values: GroupItem) {
+  const {id, index} = values;
+  if (!id) {
+    todoList.value.push({
+      ...values,
+      id: uuid(),
+    });
+  } else {
+    todoList.value[index as number] = {...values};
+  }
+
+  editFormRef.value.handleClose();
+
+}
+onMounted(async () => {
+  const res :Res = await getJson('toDoJSON');
+  let list = res?.data?.todoList;
+  if (!list || !list?.length) {
+    list = defaultData
+  }
+  todoList.value = list
+})
+
+
+// 任务
+const taskFormRef = ref();
+const currentTask = ref<TodoItem>()
+function handleAddTask () {
+  currentTask.value = undefined;
+  taskFormRef.value.handleShow();
+}
+function handleDelTask(index:number) {
+  todoList.value[currentGroup.value.index || 0]!.children?.splice(index, 1)
+}
+function handleEditTask (task: TodoItem, index: number) {
+  handleAddTask();
+  currentTask.value = {...task, index};
+}
+function onSubmitTask(task: TodoItem) {
+  try {
+    const {id} = task;
+    const {index = 0} = currentGroup.value;
+    const children = todoList.value?.[index]?.children;
+    if (!children) {
+      todoList.value[index]['children'] = []
+    }
+    // 清楚 task 中的 index
+    let item = {
+      ...task,
+      index: undefined,
+      id: uuid(), pid:
+      currentGroup.value.id,
+      status: task?.status ?? false
+    }
+    if (!id) {
+      todoList.value![index]!.children!.push(item)
+    } else {
+      todoList.value![index]!.children!.splice(task.index, 1, item)
+    }
+    taskFormRef.value?.handleClose();
+  } catch (e) {
+    console.warn(e, '出错了哦')
+  }
+}
+// 保存数据
+watch(() => todoList.value, (val) => {
+  savaJson({todoList: val})
+}, {deep: true})
+
 </script>
 
 <template>
   <div class="to-do flex border h-full min-h-[500px]">
-    <div class="menu min-w-[60px] w-[60px] bg-[#09090b] ">
+    <div class="menu bg-[#09090b] ">
       <ul>
         <li class="menu-item flex-center flex-col py-3">
-          <el-avatar :size="40" />
+          <el-avatar :size="40"/>
         </li>
         <li class="menu-item flex-center flex-col py-3 hover:bg-[#262626]">
           <el-badge :value="12" class="item">
-            <el-icon size="30" color="#fff"><Message /></el-icon>
+            <el-icon size="30" color="#fff">
+              <Message/>
+            </el-icon>
           </el-badge>
         </li>
         <li class="menu-item flex-center flex-col py-3 hover:bg-[#262626]">
-          <el-icon size="30" color="#fff"><Setting /></el-icon>
+          <el-icon size="30" color="#fff">
+            <Setting/>
+          </el-icon>
         </li>
       </ul>
     </div>
-    <div class="group min-w-[240px] w-[240px] bg-[#fafafa]">
+    <div class="grouping  bg-[#fafafa]">
       <div class="group-header p-[10px] border-cyan-100 flex items-center">
-        <el-input placeholder="搜索" class="text-white"/>
-        <div class="header-plus">
-          <el-icon size="16" color="#000"><Plus /></el-icon>
+        <el-input placeholder="搜索" class="group-header-search text-white"/>
+        <div class="header-plus" @click="handleGroupAdd">
+          <el-icon size="16" color="#000">
+            <Plus/>
+          </el-icon>
         </div>
       </div>
-      <ul>
-        <li class="group-item relative p-[10px] flex items-center" v-for="(el, index) in todoList" @click="handleGroupItem(el)" :key="'group-' + index + '-' +el.title">
-          <!--    可自定义 默认显示分类的优先级      -->
-          <div class="group-item-icon rounded bg-gray-500 w-[40px] h-[40px] mr-2"></div>
+      <div class="group-items">
+        <el-scrollbar>
+          <ul>
+            <li class="group-item relative p-[10px] flex items-center" v-for="(el, index) in todoList"
+                @click="handleGroupItem(el, index)" :key="'group-' + index + '-' +el.title">
+              <!--    可自定义 默认显示分类的优先级      -->
+              <div class="group-item-icon rounded-xl bg-gray-500 w-[40px] h-[40px] mr-2"></div>
+              <div>
+                <p class="title text-sm">{{ el.title }}</p>
+                <p class="text-xs text-[#999999]">{{ el.subtitle }}</p>
+              </div>
+              <div class="item-right qy-transition">
+                <el-icon size="20" color="#000">
+                  <Edit @click.stop="handleGroupEdit(el, index)"/>
+                </el-icon>
+                <el-icon size="20" color="#000">
+                  <Delete @click.stop="handleGroupDel(index, el.id)"/>
+                </el-icon>
+              </div>
+            </li>
+          </ul>
+        </el-scrollbar>
+      </div>
+
+    </div>
+    <div class="group-list w-full flex-col bg-[#f5f5f5]" id="group-list">
+      <div class="group-list-header flex justify-between items-center" v-show="currentGroup.title">
+        <div class="flex">
           <div>
-            <p class="title text-sm">{{ el.title }}</p>
-            <p class="text-xs text-[#999999]">{{ el.subtitle }}</p>
+            <p class="text-sm">{{ currentGroup.title }}</p>
+            <p class="text-xs">{{ currentGroup.subtitle }}</p>
           </div>
-          <div class="group-right qy-transition">
-            <el-icon size="20" color="#000"><Delete /></el-icon>
+          <div class="group-status ml-4">
+            <el-badge is-dot :type="currentGroup.type || 'info'"/>
           </div>
-        </li>
-      </ul>
-    </div>
-    <div class="group-list w-full flex-col bg-[#f5f5f5]">
-      <div class="group-list-header flex" v-show="currentGroup.title">
-        <div>
-          <p class="text-sm">{{currentGroup.title}}</p>
-          <p class="text-xs">{{currentGroup.subtitle}}</p>
         </div>
-        <div class="group-status ml-4">
-          <el-badge is-dot :type="currentGroup.type || 'info'" />
+        <div class="header-btn">
+          <el-dropdown>
+            <el-button link>
+              <el-icon><MoreFilled /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="handleAddTask">新增任务</el-dropdown-item>
+                <el-dropdown-item type="danger" @click="handleGroupDel(currentGroup.index as number, currentGroup.id)">删除分组</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
       </div>
-      <ul class="list-item-box" v-show="currentGroup && currentGroup.children && currentGroup.children.length > 0">
-        <li class="list-item rounded-x" v-for="(el, index) in currentGroup.children" :key="'group-list-item' + index">
-          <div class="todo-time rounded text-xs m-auto max-w-[120px]">2024-05-11 18:21</div>
-          <div class="todo-content rounded">
-            <div class="list-item-title">我是标题</div>
-            <div class="list-item-content">我是内容</div>
-          </div>
-        </li>
-      </ul>
+      <div class="task">
+        <el-scrollbar>
+          <ul class="list-item-box" v-show="currentGroup && currentGroup.children && currentGroup.children.length > 0">
+            <li class="list-item rounded-x" v-for="(el,index) in currentGroup.children" :key="el.id" @click="handleEditTask(el, index)">
+              <div class="text-center" v-if="el.createTime">
+                 <span class="todo-time rounded text-xs "> {{formatDateTime(el.createTime)}} </span>
+              </div>
+              <div class="todo-content rounded w-full handle-item flex items-center">
+                <el-checkbox  @click.stop v-model="el.status"></el-checkbox>
+                <div class="ml-2">
+                  <div class="list-item-title" v-if="el.title">{{ el.title }}</div>
+                  <div class="list-item-content w-full overflow-hidden" v-if="el.content">
+                    <el-text truncated line-clamp="2" class="w-full text-xs text-[#999999] ">
+                      {{el.content}}
+                    </el-text>
+                  </div>
+                </div>
+                <div class="item-right qy-transition">
+                  <el-icon size="20" color="#000">
+                    <Delete @click.stop="handleDelTask(index)"/>
+                  </el-icon>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </el-scrollbar>
+      </div>
+
+
+
     </div>
+    <edit-form :record="record" ref="editFormRef" @on-submit="onSubmit"/>
+    <edit-task :record="currentTask" ref="taskFormRef" @on-submit="onSubmitTask"/>
   </div>
 </template>
 
 <style scoped lang="less">
 .to-do {
-  --b-c: #e7e5e4;
+  --bC: #e7e5e4;
   --p: 10px;
+  --w: 700px;
+  --h: 600px;
+  --headerH: 53px;
+  --groupW: 225px;
+  --menuW: 55px;
+
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+
+  .menu {
+    width: var(--menuW);
+    flex: 0 0 var(--menuW)
+  }
+
+
   .group-header {
     background-color: #fff;
     border-bottom: 1px solid var(--b-c);
@@ -101,54 +282,31 @@ function handleGroupItem(el: GroupItem) {
     .header-plus {
       height: 32px;
       width: 32px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       background-color: #E2E2E2;
       margin-left: var(--p);
     }
   }
-  .group {
-    background-color: #E6E5E5;
-    border-right: 1px solid var(--b-c);
 
-    :deep(.el-input__wrapper) {
-      background-color: #E2E2E2;
-      input {
-        color: #fff;
-        font-size: 14px;
-      }
-    }
-    .group-item {
-      overflow: hidden;
-      .group-right {
-        position: absolute;
-        right: -50px;
-        font-size: 20px;
-        color: #646cff;
-        font-weight: 600;
-      }
-    }
 
-    .group-item:hover {
-      background-color: #CBCACA;
-      .group-right {
-        right: var(--p);
-      }
-    }
-
-  }
   .group-list {
+    width: calc(100% - var(--groupW) - var(--menuW));
+    overflow: hidden;
     .group-list-header {
-      padding: 8px var(--p) ;
+      padding: 8px var(--p);
       border-bottom: 1px solid var(--b-c);
-      deep(.el-badge__content.is-dot) {
-      width: 15px;
-      height: 15px;
+      max-height: 53px;
+      //v-deep() .el-badge__content.is-dot{
+      //  width: 15px;
+      //  height: 15px;
+      //}
     }
-    }
+
     .list-item-box {
       padding: var(--p);
+
       .list-item {
         padding: var(--p);
         //background-color: #fff;
@@ -159,17 +317,72 @@ function handleGroupItem(el: GroupItem) {
         padding: 5px;
         background-color: #DADADA;
       }
+
       .todo-content {
         padding: var(--p);
         background-color: #fff;
         margin-top: 20px;
       }
+
       .todo-content:hover {
-        box-shadow: 0 10px 20px -18px;
+        box-shadow: 0 2px 10px -18px;
+      }
+    }
+    .task {
+      height: calc(100% - 53px);
+      overflow: hidden;
+    }
+  }
+
+
+  .item-right {
+    position: absolute;
+    right: -50px;
+    font-size: 20px;
+    color: #646cff;
+    font-weight: 600;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .handle-item {
+    position: relative;
+  }
+  .handle-item:hover {
+    .item-right {
+      right: var(--p);
+      background-color: #fff;
+    }
+  }
+  .grouping {
+    width: var(--groupW);
+    flex: 0 0 var(--groupW);
+    background-color: #E6E5E5;
+    border-right: 1px solid var(--bC);
+
+    .group-header-search {
+      :deep(.el-input__wrapper) {
+        background-color: #E2E2E2;
+
+        input {
+          color: #fff;
+          font-size: 14px;
+        }
       }
     }
 
 
+    .group-item {
+      overflow: hidden;
+    }
+
+    .group-item:hover {
+      background-color: #CBCACA;
+    }
+  }
+
+
+  .group-items {
+    height: calc(100% - var(--headerH));
   }
 }
 </style>

@@ -8,31 +8,31 @@ const keyword = ref('')
 const placeholder = computed(() => !keyword.value ? 'Hi' : '')
 
 //
-// const msg = ref('');
-// function sendMessage() {
-//   msg.value = 'Hello World'
-//   setTimeout(() => {
-//     msg.value = ''
-//   }, 2000)
-// }
+const msg = ref('');
+function sendMessage() {
+  msg.value = 'Hello World'
+  setTimeout(() => {
+    msg.value = ''
+  }, 2000)
+}
 </script>
 
 <template>
   <div class="relative w-full h-full">
     <div class="home ">
-      <header class="w-full drag">
-        <el-input v-model="keyword" class="keyword caret-pink-500 h-[50px] !border-0 text-white" :placeholder="placeholder"/>
-      </header>
+<!--      <header class="w-full drag">-->
+<!--        <el-input v-model.trim="keyword" class="keyword caret-pink-500 h-[50px] !border-0 text-white" :placeholder="placeholder"/>-->
+<!--      </header>-->
       <main class="content">
-        <div class="">
-          <h6 class="text-white">最近使用</h6>
-          <qy-list />
-        </div>
+<!--        <div class="">-->
+<!--          <h6 class="text-white">最近使用</h6>-->
+<!--          <qy-list />-->
+<!--        </div>-->
         <todo-list></todo-list>
       </main>
 
     </div>
-    <!--    <footer @click="sendMessage"></footer>-->
+    <footer @click="sendMessage"></footer>
     <!--    <notification :msg="msg"/>-->
   </div>
 </template>
@@ -47,10 +47,19 @@ const placeholder = computed(() => !keyword.value ? 'Hi' : '')
   border-radius: 10px;
   //padding: var(--p);
   header, main {
-    padding: var(--p);
+    //padding: var(--p);
   }
   header {
     background-color: #213547;
+    :deep(.el-input__wrapper) {
+      box-shadow: none!important;
+      background-color: transparent;
+
+      input {
+        color: #fff;
+        font-size: 18px;
+      }
+    }
   }
   main {
     background-color: #1c2d3d;
@@ -75,15 +84,7 @@ footer:hover {
 .keyword {
   --el-input-border-color: transparent;
 }
-:deep(.el-input__wrapper) {
-  box-shadow: none!important;
-  background-color: transparent;
 
-  input {
-    color: #fff;
-    font-size: 18px;
-  }
-}
 
 .content {
   transition: all 1s ease;
