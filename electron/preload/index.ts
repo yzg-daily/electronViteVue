@@ -1,4 +1,4 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import { app, ipcRenderer, contextBridge } from 'electron'
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -18,7 +18,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
   },
-
+  userDataUrl: process.env["VITE_USER_DATA_URL"]
   // You can expose other APTs you need here.
   // ...
 })

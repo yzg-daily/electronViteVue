@@ -1,7 +1,9 @@
 import {ResCodeEnum} from "../../types/enum";
 
-const { VITE_USER_DATA_URL } = import.meta.env;
-let todoJsonUrl = VITE_USER_DATA_URL + '/task/data.json';
+console.log(window.ipcRenderer.userDataUrl, 'todoJsonUrl');
+const userDataUrl = window.ipcRenderer.userDataUrl
+let todoJsonUrl = userDataUrl + '/task/data.json';
+
 
 function createSuccess (data = undefined, msg = '操作成功!') {
     return {
@@ -18,6 +20,7 @@ function createError (e: Error|undefined, msg = '操作失败！') {
 }
 
 export async function savaJson (json: object): Promise<Res<{todoList: GroupItem[]}>> {
+    console.log(json, 'savaJson-json');
     if (!json) return createError(undefined, '保存失败');
     try {
         let content = JSON.stringify(json)
