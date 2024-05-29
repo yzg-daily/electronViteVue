@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
   },
+  processEnv: process.env,
   userDataUrl: process.env["VITE_USER_DATA_URL"]
   // You can expose other APTs you need here.
   // ...
