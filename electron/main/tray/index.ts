@@ -1,18 +1,22 @@
 import path from 'path'
 import {ipcMain, app, Menu, Tray, dialog, type MessageBoxOptions} from 'electron'
+import log from 'electron-log'
 
 import {isMac} from "../../utils";
 // Tray 是一个小图标，它位于系统的通知区域，通常被用来实现快速的应用程序启动、通知等功能
-let appIcon = null
-let iconPath = app.getAppPath() + path.join('/public/icon', isMac ? 'iconTemplate.png' : '32x32-h.png')
-
+// 注意 icon 的命名。mac 是xxxTemplate,这里直接用mac命名格式.建议不要使用 xx-xx.png 格式
+// icon 默认是放在了 public/icon 下。打包之后app.asar下并没有public目录,打包之后反问app.asar/dist
+let trayIcon = null
+let iconPath = path.join(`${process.env.VITE_PUBLIC}/icon/32x32Template.png`)
+log.info(`trayIcon: ${iconPath}`)
 function createTray(win) {
-    appIcon = new Tray(iconPath)
+    trayIcon = new Tray(iconPath)
+    // 基础功能
     const contextMenu = Menu.buildFromTemplate([
         // {
         //     label: 'Remove',
         //     click: () => {
-        //         appIcon.destroy()
+        //         trayIcon.destroy()
         //     }
         // },
         {
@@ -31,11 +35,23 @@ function createTray(win) {
         },
         {label: '退出', click: () => app.quit()}
     ])
-    //
-    appIcon.setToolTip(app.name)
-    appIcon.setContextMenu(contextMenu)
+    trayIcon.setToolTip(app.name)
+    trayIcon.setContextMenu(contextMenu)
+    trayIcon.on('click', () => {
+        if (!win.isVisible()) {
+            win.show()
+            win.focus()
+        }
+        if (isMac && app.isHidden()) {
+            app.show()
+        }
+        win.setAlwaysOnTop(true);
+        let time = setTimeout(() => {
+            win.setAlwaysOnTop(false);
+        }, 0)
+    })
     app.on('window-all-closed', () => {
-        if (appIcon) appIcon.destroy()
+        if (trayIcon) trayIcon.destroy()
     })
 }
 
@@ -43,19 +59,19 @@ function findIconPath(name: string) {
     if (isMac) {
         return path.join(app.getAppPath(), `public/icon/${name}Template.png`)
     } else {
-        return path.join(app.getAppPath(), `public/icon/${name}`)
+        return path.join(app.getAppPath(), `public/icon/${name}.png`)
     }
 
 }
 export function setTrayImage(imagePath?: string) {
-    appIcon.setImage(imagePath)
+    trayIcon.setImage(imagePath)
 }
 
 
 // 有新消息的时候，可以在 Tray 上显示一个小红点 或者 Tray 闪烁
-let appIconIndex = null;
+let trayIconIndex = null;
 function messageTip() {
-    if (!appIcon) {
+    if (!trayIcon) {
         return
     }
     const options: MessageBoxOptions = {
@@ -64,32 +80,29 @@ function messageTip() {
         message: "我在提示你",
         buttons: ['Yes', 'No']
     }
-    dialog.showMessageBox(null, options).then(res => {
-        console.log(res);
-    })
+    // dialog.showMessageBox(null, options).then(res => {
+    //     console.log(res);
+    // })
     // 每隔一秒钟切换一次 Tray 的图标
     let status = false;
     let num = 0;
     // setTrayImage(findIconPath('32x32.png'))
-    appIcon.displayBalloon({
-        title: '这个地区发',
-        iconType: 'custom',
-        content: '了哇哈哈'
-    })
+    // trayIcon.displayBalloon({
+    //     title: '这个地区发',
+    //     iconType: 'custom',
+    //     content: '了哇哈哈'
+    // })
     let a = setInterval(() => {
         status = !status
         num++;
-        console.log(num);
-        setTrayImage(findIconPath(status ? '32x32.png': '32x32-h.png'))
+        setTrayImage(findIconPath(status ? 'drag': '32x32'))
         if (num >= 5) {
             num = 0;
             clearInterval(a)
-            setTrayImage(findIconPath('32x32-h.png'))
+            setTrayImage(findIconPath('32x32'))
         }
     }, 800);
 
 }
-
-
 export default createTray
 

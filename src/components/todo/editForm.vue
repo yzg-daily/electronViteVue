@@ -2,7 +2,7 @@
 
 import {reactive, ref, watch} from "vue";
 import {FormRules} from "element-plus";
-
+import todoIcon from '@c/todo/todoIcons.vue'
 interface Props {
   record: any
 }
@@ -80,11 +80,15 @@ defineExpose({
          <el-form-item prop="subtitle">
            <el-input placeholder="标题" v-model.trim="formData.values.subtitle"></el-input>
          </el-form-item>
-<!--         <el-form-item>-->
-<!--           <el-select>-->
-<!--             <el-option v-for="el in TodoType" :key="el" :value="el" :label="el" />-->
-<!--           </el-select>-->
-<!--         </el-form-item>-->
+         <el-form-item class="w-full" prop="icon">
+           <el-popover trigger="click" :width="160">
+              <template #reference>
+                <el-image class="w-[60px]" :src="formData.values.icon" v-if="formData.values.icon"></el-image>
+                <span v-else>请选中分组图片</span>
+              </template>
+             <todoIcon  v-model="formData.values.icon"/>
+           </el-popover>
+         </el-form-item>
        </el-form>
        <template #footer>
          <el-button @click="onSubmit" type="primary">保存</el-button>

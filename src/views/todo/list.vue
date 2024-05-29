@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import {onMounted, ref, watch} from "vue";
 import {Delete, Edit, Message, Plus, Setting, MoreFilled} from '@element-plus/icons-vue'
-
-import editForm from '@c/todo/editForm.vue'
-import editTask from '@c/todo/editTask.vue'
 import {uuid} from "@u"
+import pageHeader from '@c/header.vue'
+import editForm from '@c/todo/editForm.vue'
+
+import editTask from '@c/todo/editTask.vue'
+import TaskItem from '@c/todo/taskItem.vue'
+import TaskItemTime from '@c/todo/taskTime.vue'
+
 import {getJson, savaJson} from '../../utils/save'
-import {formatDateTime} from '../../utils/times'
+
+
 
 defineOptions({
   name: 'to-do-list'
@@ -38,6 +43,7 @@ const todoList = ref<GroupItem[]>([])
 const currentGroup = ref<GroupItem>({
   title: '',
   subtitle: '',
+  icon: undefined,
   type: 'primary',
   status: false,
   children: []
@@ -123,7 +129,7 @@ function onSubmitTask(task: TodoItem) {
       status: task?.status ?? false
     }
     if (!id) {
-      todoList.value![index]!.children!.push(item)
+      todoList.value![index]!.children!.unshift(item)
     } else {
       todoList.value![index]!.children!.splice(task.index, 1, item)
     }
@@ -160,95 +166,85 @@ watch(() => todoList.value, (val) => {
         </li>
       </ul>
     </div>
-    <div class="grouping  bg-[#fafafa]">
-      <div class="group-header p-[10px] border-cyan-100 flex items-center">
-        <el-input placeholder="搜索" class="group-header-search text-white"/>
-        <div class="header-plus" @click="handleGroupAdd">
-          <el-icon size="16" color="#000">
-            <Plus/>
-          </el-icon>
-        </div>
-      </div>
-      <div class="group-items">
-        <el-scrollbar>
-          <ul>
-            <li class="group-item relative p-[10px] flex items-center" v-for="(el, index) in todoList"
-                @click="handleGroupItem(el, index)" :key="'group-' + index + '-' +el.title">
-              <!--    可自定义 默认显示分类的优先级      -->
-              <div class="group-item-icon rounded-xl bg-gray-500 w-[40px] h-[40px] mr-2"></div>
-              <div>
-                <p class="title text-sm">{{ el.title }}</p>
-                <p class="text-xs text-[#999999]">{{ el.subtitle }}</p>
-              </div>
-              <div class="item-right qy-transition">
-                <el-icon size="20" color="#000">
-                  <Edit @click.stop="handleGroupEdit(el, index)"/>
-                </el-icon>
-                <el-icon size="20" color="#000">
-                  <Delete @click.stop="handleGroupDel(index, el.id)"/>
-                </el-icon>
-              </div>
-            </li>
-          </ul>
-        </el-scrollbar>
-      </div>
-
-    </div>
-    <div class="group-list w-full flex-col bg-[#f5f5f5]" id="group-list">
-      <div class="group-list-header flex justify-between items-center" v-show="currentGroup.title">
-        <div class="flex">
-          <div>
-            <p class="text-sm">{{ currentGroup.title }}</p>
-            <p class="text-xs">{{ currentGroup.subtitle }}</p>
+    <div class="task-content">
+      <page-header/>
+      <div class="flex w-full h-full">
+        <div class="grouping  bg-[#fafafa]">
+          <div class="group-header p-[10px]  flex items-center">
+            <el-input placeholder="搜索" class="group-header-search text-white"/>
+            <div class="header-plus" @click="handleGroupAdd">
+              <el-icon size="16" color="#000">
+                <Plus/>
+              </el-icon>
+            </div>
           </div>
-          <div class="group-status ml-4">
-            <el-badge is-dot :type="currentGroup.type || 'info'"/>
-          </div>
-        </div>
-        <div class="header-btn">
-          <el-dropdown>
-            <el-button link>
-              <el-icon><MoreFilled /></el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="handleAddTask">新增任务</el-dropdown-item>
-                <el-dropdown-item type="danger" @click="handleGroupDel(currentGroup.index as number, currentGroup.id)">删除分组</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </div>
-      <div class="task">
-        <el-scrollbar>
-          <ul class="list-item-box" v-show="currentGroup && currentGroup.children && currentGroup.children.length > 0">
-            <li class="list-item rounded-x" v-for="(el,index) in currentGroup.children" :key="el.id" @click="handleEditTask(el, index)">
-              <div class="text-center" v-if="el.createTime">
-                 <span class="todo-time rounded text-xs "> {{formatDateTime(el.createTime)}} </span>
-              </div>
-              <div class="todo-content rounded w-full handle-item flex items-center">
-                <el-checkbox  @click.stop v-model="el.status"></el-checkbox>
-                <div class="ml-2">
-                  <div class="list-item-title" v-if="el.title">{{ el.title }}</div>
-                  <div class="list-item-content w-full overflow-hidden" v-if="el.content">
-                    <el-text truncated line-clamp="2" class="w-full text-xs text-[#999999] ">
-                      {{el.content}}
-                    </el-text>
+          <div class="group-items">
+            <el-scrollbar>
+              <ul>
+                <li class="group-item handle-item relative p-[10px] flex items-center" v-for="(el, index) in todoList"
+                    @click="handleGroupItem(el, index)" :key="'group-' + index + '-' +el.title">
+                  <!--    可自定义 默认显示分类的优先级      -->
+                  <div class="group-item-icon rounded-xl w-[40px] h-[40px] mr-2" :class="{'bg-gray-500': !el.icon}">
+                    <el-image v-if="el.icon" :src="el.icon"></el-image>
                   </div>
-                </div>
-                <div class="item-right qy-transition">
-                  <el-icon size="20" color="#000">
-                    <Delete @click.stop="handleDelTask(index)"/>
-                  </el-icon>
-                </div>
+                  <div>
+                    <p class="title text-sm">{{ el.title }}</p>
+                    <p class="text-xs text-[#999999]">{{ el.subtitle }}</p>
+                  </div>
+                  <div class="item-right qy-transition">
+                    <el-icon size="20" color="#000">
+                      <Edit @click.stop="handleGroupEdit(el, index)"/>
+                    </el-icon>
+                    <el-icon size="20" color="#000">
+                      <Delete @click.stop="handleGroupDel(index, el.id)"/>
+                    </el-icon>
+                  </div>
+                </li>
+              </ul>
+            </el-scrollbar>
+          </div>
+        </div>
+        <div class="group-list w-full flex-col" id="group-list">
+          <div class="group-list-header flex justify-between items-center" v-show="currentGroup.title">
+            <div class="flex">
+              <div>
+                <p class="text-sm">{{ currentGroup.title }}</p>
+<!--                <p class="text-xs">{{ currentGroup.subtitle }}</p>-->
               </div>
-            </li>
-          </ul>
-        </el-scrollbar>
+              <div class="group-status ml-4">
+                <el-badge is-dot :type="currentGroup.type || 'info'"/>
+              </div>
+            </div>
+            <div class="header-btn">
+<!--              <el-dropdown>-->
+<!--                <el-button link>-->
+<!--                  <el-icon><MoreFilled /></el-icon>-->
+<!--                </el-button>-->
+<!--                <template #dropdown>-->
+<!--                  <el-dropdown-menu>-->
+<!--                    <el-dropdown-item @click="handleAddTask">新增任务</el-dropdown-item>-->
+<!--                    <el-dropdown-item type="danger" @click="handleGroupDel(currentGroup.index as number, currentGroup.id)">删除分组</el-dropdown-item>-->
+<!--                  </el-dropdown-menu>-->
+<!--                </template>-->
+<!--              </el-dropdown>-->
+            </div>
+          </div>
+          <div class="task w-full relative">
+            <el-scrollbar class="w-full">
+              <ul class="list-item-box" v-show="currentGroup && currentGroup.children && currentGroup.children.length > 0">
+                <li class="list-item rounded-x" v-for="(el,index) in currentGroup.children" :key="el.id" >
+                  <TaskItemTime :time="el.createTime" v-if="el.createTime"/>
+                  <div class="bg-white rounded p-2 overflow-hidden flex items-baseline mt-[12px]">
+                    <el-checkbox v-model="el.status"/>
+                    <TaskItem @click="handleEditTask(el, index)" :el="el" @del-task="handleDelTask(index)"/>
+                  </div>
+                </li>
+              </ul>
+            </el-scrollbar>
+            <el-button class="add-task_btn opacity-50 hover:opacity-100" :icon="Plus" @click="handleAddTask"/>
+          </div>
+        </div>
       </div>
-
-
-
     </div>
     <edit-form :record="record" ref="editFormRef" @on-submit="onSubmit"/>
     <edit-task :record="currentTask" ref="taskFormRef" @on-submit="onSubmitTask"/>
@@ -273,11 +269,17 @@ watch(() => todoList.value, (val) => {
     width: var(--menuW);
     flex: 0 0 var(--menuW)
   }
+  .task-content {
+    width: calc(100% - var(--menuW));
+    :deep(.window-header) {
+      border-bottom: 1px solid var(--bC);
+     }
+  }
 
 
   .group-header {
     background-color: #fff;
-    border-bottom: 1px solid var(--b-c);
+    border-bottom: 1px solid var(--bC);
 
     .header-plus {
       height: 32px;
@@ -292,40 +294,32 @@ watch(() => todoList.value, (val) => {
 
 
   .group-list {
-    width: calc(100% - var(--groupW) - var(--menuW));
+    background-color: #f5f5f5;
+    //width: calc(100% - var(--groupW) - var(--menuW));
     overflow: hidden;
     .group-list-header {
       padding: 8px var(--p);
-      border-bottom: 1px solid var(--b-c);
+      border-bottom: 1px solid var(--bC);
       max-height: 53px;
+      background-color: #fff;
       //v-deep() .el-badge__content.is-dot{
       //  width: 15px;
       //  height: 15px;
       //}
     }
-
     .list-item-box {
       padding: var(--p);
 
       .list-item {
         padding: var(--p);
         //background-color: #fff;
-      }
-
-      .todo-time {
-        text-align: center;
-        padding: 5px;
-        background-color: #DADADA;
-      }
-
-      .todo-content {
-        padding: var(--p);
-        background-color: #fff;
-        margin-top: 20px;
-      }
-
-      .todo-content:hover {
-        box-shadow: 0 2px 10px -18px;
+        :deep(.task-item) {
+          width: 100%;
+          overflow: hidden;
+          .todo-content:hover {
+            box-shadow: 0 2px 10px -18px;
+          }
+        }
       }
     }
     .task {
@@ -334,25 +328,6 @@ watch(() => todoList.value, (val) => {
     }
   }
 
-
-  .item-right {
-    position: absolute;
-    right: -50px;
-    font-size: 20px;
-    color: #646cff;
-    font-weight: 600;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  .handle-item {
-    position: relative;
-  }
-  .handle-item:hover {
-    .item-right {
-      right: var(--p);
-      background-color: #fff;
-    }
-  }
   .grouping {
     width: var(--groupW);
     flex: 0 0 var(--groupW);
@@ -383,6 +358,14 @@ watch(() => todoList.value, (val) => {
 
   .group-items {
     height: calc(100% - var(--headerH));
+  }
+
+  .add-task_btn {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    bottom: 25px;
+    right: 15px;
   }
 }
 </style>

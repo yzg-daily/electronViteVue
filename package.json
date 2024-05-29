@@ -2,7 +2,7 @@
   "name": "task_to_do",
   "version": "0.0.1",
   "main": "dist-electron/main/index.js",
-  "description": "Really simple Electron + Vue + Vite boilerplate.",
+  "description": "一个记录日常任务得软件",
   "author": "qy",
   "license": "MIT",
   "private": true,
@@ -41,6 +41,7 @@
     "vue-tsc": "^2.0.6"
   },
   "dependencies": {
+    "electron-log": "^5.1.4",
     "element-plus": "^2.7.2",
     "uuid": "^9.0.1",
     "vue-router": "^4.3.2"

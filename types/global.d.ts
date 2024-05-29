@@ -31,6 +31,7 @@ declare global {
         index?: number;
         title?: string;
         subtitle?: string; // 副标题 描述之类的
+        icon?: string; //
         status?: boolean; // 是否执行中
         type?: TodoType;
         children?: TodoItem[],

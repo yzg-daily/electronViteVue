@@ -29,7 +29,7 @@ export async function saveFile(filePath: string = '/', fileContent = '', options
     try {
         // 获取文件目录
         const directory = path.dirname(filePath);
-        // 如何没有就新建一个
+        // 如果没有这个目录就新建一个
         await fs.mkdir(directory, { recursive: true });
         // const filename = path.basename(filePath);
         // const isHasFile = await fs.access(filePath, fs.constants.F_OK);
@@ -42,7 +42,7 @@ export async function saveFile(filePath: string = '/', fileContent = '', options
         //     console.log(res, 'fs.access(filePath, fs.constants.F_OK)');
         // })
         // 写入文件
-        await fs.writeFile(dataDirectory(filePath), fileContent, {
+        await fs.writeFile(filePath, fileContent, {
             encoding: 'utf8',
             ...options
         });
@@ -54,6 +54,25 @@ export async function saveFile(filePath: string = '/', fileContent = '', options
         return {
             code: ResCodeEnum.File,
             msg: `Error saving file: ${err.message}`
+        }
+    }
+}
+
+
+
+export async function readdirFile (readdirPath = '', option = {}) {
+    try {
+        const files = await fs.readdir(readdirPath, option)
+        console.log(files);
+        return {
+            code: ResCodeEnum.Ok,
+            msg: '操作成功',
+            data: files
+        }
+    } catch (e) {
+        return {
+            code: ResCodeEnum.File,
+            msg: `Error saving file: ${e.message}`
         }
     }
 }

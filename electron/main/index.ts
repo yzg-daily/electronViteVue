@@ -1,28 +1,27 @@
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
-import { createRequire } from 'node:module'
-import { fileURLToPath } from 'node:url'
+import log from 'electron-log'
 import path from 'node:path' // path 可能会有命名冲突问题
 import os from 'node:os' // 获取操作系统相关的信息
+import '../utils/processEnv'
 import createTray from '../main/tray/index'
 import '../main/ipc/index'
-// import.meta.url 是 ES 模块中的一个特殊变量，它提供了当前模块文件的 URL 地址。它是一个只读的变量，可以用于获取当前模块文件的绝对路径。
-// 在 Node.js 中，import.meta.url 返回的是当前模块文件的文件 URL 地址。这个 URL 地址使用 file:// 协议表示文件系统中的路径，可以通过 url 模块中的 fileURLToPath() 方法将其转换为文件路径。
-// 在浏览器环境中，import.meta.url 返回的是当前模块文件的绝对路径的 URL 地址。
-// 你可以使用 import.meta.url 来获取当前模块文件的路径，以便在模块中进行相应的操作，比如动态地加载其他模块、读取文件等
-const require = createRequire(import.meta.url)
-// 获取当前模块的目录路径
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// 项目根目录
-process.env.APP_ROOT = path.join(__dirname, '../..')
+import '../main/ipc/header'
 
-export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
-export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
-// 开发中是 本地服务地址，打包后为空
-export const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
-// 静态目录
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
-  ? path.join(process.env.APP_ROOT, 'public')
-  : RENDERER_DIST
+log. initialize()
+log. info('electron-main-start');
+
+const  {VITE_DEV_SERVER_URL,__dirname,RENDERER_DIST} = process.env;
+
+
+process.on('uncaughtException', (error, origin) => {
+  log.error('An uncaught exception occurred:', error);
+  log.error('Origin:', origin);
+  // 在这里可以添加其他错误处理逻辑，比如发送崩溃报告等
+});
+process.on('unhandledRejection', (reason, promise) => {
+  log.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // 在这里可以添加其他错误处理逻辑
+});
 
 // Disable GPU Acceleration for Windows 7
 if (os.release().startsWith('6.1')) app.disableHardwareAcceleration()
@@ -35,13 +34,14 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 
+
 let win: BrowserWindow | null = null
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'QY', // index.html 中的 <title>xxx</title> 会覆盖这里
+    title: 'toDo', // index.html 中的 <title>xxx</title> 会覆盖这里
     width: 700,
     height: 600,
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
@@ -78,7 +78,10 @@ async function createWindow() {
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  log.transports.file!.file = `${app.getPath('userData')}/logs/app.log`;
+  createWindow();
+})
 
 app.on('window-all-closed', () => {
   win = null

@@ -6,6 +6,10 @@
     padding: 0;
     box-sizing: border-box;
 }
+root {
+    --windowHeight: 24px;
+    --windowBackground: #fff;
+}
 html, body {
     /*height: 100vh;*/
     @apply transition-all duration-300;
@@ -44,4 +48,36 @@ ul, li {
 
 .qy-transition {
     transition: all .5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.item-right {
+    position: absolute;
+    right: -50px;
+    font-size: 20px;
+    color: #646cff;
+    font-weight: 600;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.handle-item {
+    position: relative;
+}
+.handle-item:hover {
+    .item-right {
+        right: var(--p, 10px);
+        /*background-color: var(--btn-bg, #ff);*/
+    }
+}
+
+.window-header {
+    padding: 0 .5em;
+    font-size: 14px;
+    height: var(--windowHeight, 24px);
+    line-height: var(--windowHeight, 24px);
+    background-color: var(--windowBackground, #fff);
+
+    button {
+        outline: none!important;
+    }
+
 }

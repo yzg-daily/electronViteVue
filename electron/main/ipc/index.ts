@@ -1,4 +1,4 @@
-import {app, ipcMain} from 'electron'
+import {app, ipcMain, nativeImage} from 'electron'
 import {isMac} from "../../utils";
 import {exec,execSync} from 'node:child_process'
 import path from 'node:path'
@@ -88,5 +88,12 @@ ipcMain.on('get:computer:registry', (event ) => {
 //     console.log('~/Library/Saved Application Links', softwareList);
 // })
 
+ipcMain.handle('qy:nativeImage', (event, imagePath) => {
+    if (!imagePath) return '';
+    console.log(path.join(imagePath), 'path.join(imagePath)');
+    let i = nativeImage.createFromPath(path.join(imagePath));
+    console.log(i?.toDataURL());
+    return nativeImage.createFromPath(path.join(imagePath))
+})
 
 

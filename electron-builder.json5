@@ -1,9 +1,9 @@
 // @see https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json", // 配置文件格式
-  "appId": "com.electron.taskToDo",
+  "appId": "com.electron.task_to_do",
   "asar": true, // 是否打包为asar格式
-  "productName": "taskToDo",
+  "productName": "task_to_do",
   "directories": { // 目录
     "output": "release/${version}" // 输出目录
   },
@@ -12,12 +12,14 @@
     "dist-electron"
   ],
   "mac": {
+    "icon": "public/icon/512x512.png",
     "target": [ // 打包成dmg格式
       "dmg"
     ],
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
+    "icon": "public/icon/512x512.png",
     "target": [ // 打包成nsis格式
       {
         "target": "nsis",
@@ -36,6 +38,7 @@
     "deleteAppDataOnUninstall": false, // 卸载时删除应用数据
     "createDesktopShortcut": true, // 创建桌面快捷方式
     "createStartMenuShortcut": true, // 创建开始菜单快捷方式
+    "installerHeaderIcon": "public/favicon.ico", // 安装头部图标
     "installerIcon": "public/favicon.ico", // 安装图标
     "uninstallerIcon": "public/favicon.ico", // 卸载图标
     "license": "LICENSE", // 许可协议
@@ -43,11 +46,11 @@
 //    "installerHeader": "build/installerHeader.bmp", // 安装头部图片
 //    "installerSidebar": "build/installerSidebar.bmp", // 安装侧边图片
 //    "uninstallerSidebar": "build/uninstallerSidebar.bmp", // 卸载侧边图片
-    "shortcutName": "to-do", // 快捷方式名称
+    "shortcutName": "我的任务", // 快捷方式名称
     "runAfterFinish": true, // 安装完成后运行
-    "installerHeaderIcon": "public/favicon.ico", // 安装头部图标
   },
   "linux": {
+    "icon": "public/icon/512x512.png",
     "target": [
       "AppImage"
     ],

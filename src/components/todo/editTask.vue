@@ -2,6 +2,7 @@
 import {reactive, ref, watch} from "vue";
 import {FormRules} from "element-plus";
 
+
 interface Props {
   record: any
 }
@@ -62,6 +63,12 @@ function onSubmit () {
   })
 }
 
+window.addEventListener('keyup', (event) => {
+  // console.log(event.target!.tagName);
+  // if (event.target.tagName.toLowerCase() === 'textarea') {
+  //
+  // }
+}, true)
 
 
 defineExpose({
@@ -71,7 +78,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog title="编辑任务" :modal="false" v-model="show" destroy-on-close @close="handleClose">
+  <el-dialog close-on-press-escape title="编辑任务" :modal="false" v-model="show" destroy-on-close @close="handleClose">
     <el-form :model="formData.values" :rules="formData.rules" ref="formRef">
       <el-form-item prop="title">
         <el-input placeholder="任务名称" v-model="formData.values.title" />
@@ -81,7 +88,7 @@ defineExpose({
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="onSubmit" type="primary">保存</el-button>
+      <el-button @click="onSubmit" @keyup.enter="onSubmit" type="primary">保存</el-button>
       <el-button @click="handleClose">取消</el-button>
     </template>
   </el-dialog>

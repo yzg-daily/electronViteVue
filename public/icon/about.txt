@@ -1,0 +1,17 @@
+Tray 是一个小图标，它位于系统的通知区域，通常被用来实现快速的应用程序启动、通知等功能
+注意 icon 的命名。mac 是xxxTemplate,这里直接用mac命名格式.建议不要使用 xx-xx.png 格式
+icon 默认是放在了 public/icon 下。打包之后app.asar下并没有public目录,打包之后反问app.asar/dist
+
+
+
+electron-builder.json5
+"icon": "public/icon/512x512.png"
+ "nsis": {
+    "installerHeaderIcon": "public/favicon.ico", // 安装头部图标
+    "installerIcon": "public/favicon.ico", // 安装图标
+    "uninstallerIcon": "public/favicon.ico", // 卸载图标
+    "license": "LICENSE", // 许可协议
+//  "installerHeader": "build/installerHeader.bmp", // 安装头部图片
+//  "installerSidebar": "build/installerSidebar.bmp", // 安装侧边图片
+//  "uninstallerSidebar": "build/uninstallerSidebar.bmp", // 卸载侧边图片
+  },

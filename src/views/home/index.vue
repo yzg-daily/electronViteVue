@@ -18,8 +18,8 @@ function sendMessage() {
 </script>
 
 <template>
-  <div class="relative w-full h-full">
-    <div class="home ">
+  <div class="page-home relative w-full h-full">
+    <div class="home">
 <!--      <header class="w-full drag">-->
 <!--        <el-input v-model.trim="keyword" class="keyword caret-pink-500 h-[50px] !border-0 text-white" :placeholder="placeholder"/>-->
 <!--      </header>-->
@@ -38,57 +38,43 @@ function sendMessage() {
 </template>
 
 <style scoped lang="less">
-.home {
-  --p: 10px;
-  //background-color: rgba(188, 82, 243, 0.81);
-  //background-color:  #212121; //slategray;  // #0f172a1a; //  #0f172ad1;
-  //background: linear-gradient(170deg, rgba(58, 56, 56, 0.623) 0%, rgb(31, 31, 31) 100%);
-  //background: linear-gradient(top right  bottom, #000, #212121);
-  border-radius: 10px;
-  //padding: var(--p);
-  header, main {
-    //padding: var(--p);
-  }
-  header {
-    background-color: #213547;
-    :deep(.el-input__wrapper) {
-      box-shadow: none!important;
-      background-color: transparent;
 
-      input {
-        color: #fff;
-        font-size: 18px;
-      }
+.page-home {
+  .home {
+    --p: 10px;
+    //background-color: rgba(188, 82, 243, 0.81);
+    //background-color:  #212121; //slategray;  // #0f172a1a; //  #0f172ad1;
+    //background: linear-gradient(170deg, rgba(58, 56, 56, 0.623) 0%, rgb(31, 31, 31) 100%);
+    //background: linear-gradient(top right  bottom, #000, #212121);
+    border-radius: 10px;
+    main {
+      background-color: #1c2d3d;
     }
   }
-  main {
-    background-color: #1c2d3d;
+  footer {
+    background-color: rgba(188, 82, 243, 0.81);
+    border-radius: 5px;
+    width: 30px;
+    height: 10px;
+    backdrop-filter: blur(10px);
+    position: fixed;
+    left: 50%;
+    bottom: 1em;
+    transform: translateX(-50%);
+    transition: all .5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  footer:hover {
+    width: 40px;
+  }
+  .keyword {
+    --el-input-border-color: transparent;
+  }
+  .content {
+    transition: all 1s ease;
   }
 }
-footer {
-  background-color: rgba(188, 82, 243, 0.81);
-  border-radius: 5px;
-  width: 30px;
-  height: 10px;
-  backdrop-filter: blur(10px);
-  position: fixed;
-  left: 50%;
-  bottom: 1em;
-  transform: translateX(-50%);
-  transition: all .5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-footer:hover {
-  width: 40px;
-}
-.keyword {
-  --el-input-border-color: transparent;
-}
 
 
-.content {
-  transition: all 1s ease;
-}
 
 
 @keyframes showHome {
