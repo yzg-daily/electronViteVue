@@ -8,6 +8,7 @@ import editForm from '@c/todo/editForm.vue'
 import editTask from '@c/todo/editTask.vue'
 import TaskItem from '@c/todo/taskItem.vue'
 import TaskItemTime from '@c/todo/taskTime.vue'
+import todoSet from '@c/todo/todoSet.vue'
 
 import {getJson, savaJson} from '../../utils/save'
 
@@ -143,6 +144,13 @@ watch(() => todoList.value, (val) => {
   savaJson({todoList: val})
 }, {deep: true})
 
+
+const todoSetRef = ref()
+
+function showSet() {
+  todoSetRef.value.show()
+}
+
 </script>
 
 <template>
@@ -161,7 +169,7 @@ watch(() => todoList.value, (val) => {
         </li>
         <li class="menu-item flex-center flex-col py-3 hover:bg-[#262626]">
           <el-icon size="30" color="#fff">
-            <Setting/>
+            <Setting @click="showSet"/>
           </el-icon>
         </li>
       </ul>
@@ -248,6 +256,7 @@ watch(() => todoList.value, (val) => {
     </div>
     <edit-form :record="record" ref="editFormRef" @on-submit="onSubmit"/>
     <edit-task :record="currentTask" ref="taskFormRef" @on-submit="onSubmitTask"/>
+    <todo-set ref="todoSetRef"/>
   </div>
 </template>
 

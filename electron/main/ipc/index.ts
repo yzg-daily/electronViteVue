@@ -1,4 +1,4 @@
-import {app, ipcMain, nativeImage} from 'electron'
+import {app, ipcMain, nativeImage, shell} from 'electron'
 import {isMac} from "../../utils";
 import {exec,execSync} from 'node:child_process'
 import path from 'node:path'
@@ -94,6 +94,9 @@ ipcMain.handle('qy:nativeImage', (event, imagePath) => {
     let i = nativeImage.createFromPath(path.join(imagePath));
     console.log(i?.toDataURL());
     return nativeImage.createFromPath(path.join(imagePath))
+})
+ipcMain.handle('qy:openPath', (event, url) => {
+    return shell.openPath(url)
 })
 
 

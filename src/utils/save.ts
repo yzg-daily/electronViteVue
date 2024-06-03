@@ -1,6 +1,5 @@
 import {ResCodeEnum} from "../../types/enum";
 
-console.log(window.ipcRenderer.userDataUrl, 'todoJsonUrl');
 const userDataUrl = window.ipcRenderer.userDataUrl
 let todoJsonUrl = userDataUrl + '/task/data.json';
 
